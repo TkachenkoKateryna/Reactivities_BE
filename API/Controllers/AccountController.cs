@@ -41,23 +41,25 @@ namespace API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("regisiter")]
+        [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
-            if (await _userManager.Users.AnyAsync(u => u.UserName == registerDto.UserName))
+            if (await _userManager.Users.AnyAsync(u => u.UserName == registerDto.Username))
             {
-                return BadRequest("Username is already take");
+                ModelState.AddModelError("email", "Email taken");
+                return ValidationProblem(ModelState);
             }
             if (await _userManager.Users.AnyAsync(u => u.Email == registerDto.Email))
             {
-                return BadRequest("UserEmail is already take");
+                ModelState.AddModelError("username", "Username taken");
+                return ValidationProblem(ModelState);
             }
 
             var user = new AppUser
             {
                 DisplayName = registerDto.DisplayName,
                 Email = registerDto.Email,
-                UserName = registerDto.UserName,
+                UserName = registerDto.Username,
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
